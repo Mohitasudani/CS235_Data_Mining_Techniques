@@ -1,0 +1,2194 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "id": "J_K1NWBNIqm_"
+      },
+      "outputs": [],
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install fastai\n",
+        "from fastai.tabular.all import *"
+      ],
+      "metadata": {
+        "id": "X2RP2BnJIu5b"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/gdrive')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "p89eIrezKMIJ",
+        "outputId": "fdb78571-9c11-41e3-ef84-380748aec320"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/gdrive\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "cd ../content/gdrive"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "TzREvZqAKhf1",
+        "outputId": "e136d890-ae5a-443a-d3db-a51979955ad2"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "/content/gdrive\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "cd MyDrive/dmt_project/"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "J0zT6qjTKkmC",
+        "outputId": "606f6f6e-c99b-472f-cc65-b5929d1b690c"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "/content/gdrive/MyDrive/dmt_project\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_csv(\"data.csv\")"
+      ],
+      "metadata": {
+        "id": "x9dnCoCgMT-G"
+      },
+      "execution_count": 6,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Randomise dataset\n",
+        "df = df.sample(frac=1).reset_index(drop=True)\n",
+        "df.head()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 317
+        },
+        "id": "hD2CmeCZMVMr",
+        "outputId": "e80bdaec-9a4f-4884-fb0c-68255e6cddb0"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "          id diagnosis  radius_mean  texture_mean  perimeter_mean  area_mean  \\\n",
+              "0    8610862         M        20.18         23.97          143.70     1245.0   \n",
+              "1  911296201         M        17.08         27.15          111.20      930.9   \n",
+              "2    9113156         B        14.40         26.99           92.25      646.1   \n",
+              "3     911384         B        14.92         14.93           96.45      686.9   \n",
+              "4     892399         B        10.51         23.09           66.85      334.2   \n",
+              "\n",
+              "   smoothness_mean  compactness_mean  concavity_mean  concave points_mean  \\\n",
+              "0          0.12860           0.34540         0.37540              0.16040   \n",
+              "1          0.09898           0.11100         0.10070              0.06431   \n",
+              "2          0.06995           0.05223         0.03476              0.01737   \n",
+              "3          0.08098           0.08549         0.05539              0.03221   \n",
+              "4          0.10150           0.06797         0.02495              0.01875   \n",
+              "\n",
+              "   ...  texture_worst  perimeter_worst  area_worst  smoothness_worst  \\\n",
+              "0  ...          31.72            170.3      1623.0            0.1639   \n",
+              "1  ...          34.49            152.1      1648.0            0.1600   \n",
+              "2  ...          31.98            100.4       734.6            0.1017   \n",
+              "3  ...          18.22            112.0       906.6            0.1065   \n",
+              "4  ...          24.22             70.1       362.7            0.1143   \n",
+              "\n",
+              "   compactness_worst  concavity_worst  concave points_worst  symmetry_worst  \\\n",
+              "0            0.61640          0.76810               0.25080          0.5440   \n",
+              "1            0.24440          0.26390               0.15550          0.3010   \n",
+              "2            0.14600          0.14720               0.05563          0.2345   \n",
+              "3            0.27910          0.31510               0.11470          0.2688   \n",
+              "4            0.08614          0.04158               0.03125          0.2227   \n",
+              "\n",
+              "   fractal_dimension_worst  Unnamed: 32  \n",
+              "0                  0.09964          NaN  \n",
+              "1                  0.09060          NaN  \n",
+              "2                  0.06464          NaN  \n",
+              "3                  0.08273          NaN  \n",
+              "4                  0.06777          NaN  \n",
+              "\n",
+              "[5 rows x 33 columns]"
+            ],
+            "text/html": [
+              "\n",
+              "  <div id=\"df-89ab7a4d-5609-40b1-b2bf-da65d9a2bded\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>id</th>\n",
+              "      <th>diagnosis</th>\n",
+              "      <th>radius_mean</th>\n",
+              "      <th>texture_mean</th>\n",
+              "      <th>perimeter_mean</th>\n",
+              "      <th>area_mean</th>\n",
+              "      <th>smoothness_mean</th>\n",
+              "      <th>compactness_mean</th>\n",
+              "      <th>concavity_mean</th>\n",
+              "      <th>concave points_mean</th>\n",
+              "      <th>...</th>\n",
+              "      <th>texture_worst</th>\n",
+              "      <th>perimeter_worst</th>\n",
+              "      <th>area_worst</th>\n",
+              "      <th>smoothness_worst</th>\n",
+              "      <th>compactness_worst</th>\n",
+              "      <th>concavity_worst</th>\n",
+              "      <th>concave points_worst</th>\n",
+              "      <th>symmetry_worst</th>\n",
+              "      <th>fractal_dimension_worst</th>\n",
+              "      <th>Unnamed: 32</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>8610862</td>\n",
+              "      <td>M</td>\n",
+              "      <td>20.18</td>\n",
+              "      <td>23.97</td>\n",
+              "      <td>143.70</td>\n",
+              "      <td>1245.0</td>\n",
+              "      <td>0.12860</td>\n",
+              "      <td>0.34540</td>\n",
+              "      <td>0.37540</td>\n",
+              "      <td>0.16040</td>\n",
+              "      <td>...</td>\n",
+              "      <td>31.72</td>\n",
+              "      <td>170.3</td>\n",
+              "      <td>1623.0</td>\n",
+              "      <td>0.1639</td>\n",
+              "      <td>0.61640</td>\n",
+              "      <td>0.76810</td>\n",
+              "      <td>0.25080</td>\n",
+              "      <td>0.5440</td>\n",
+              "      <td>0.09964</td>\n",
+              "      <td>NaN</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>911296201</td>\n",
+              "      <td>M</td>\n",
+              "      <td>17.08</td>\n",
+              "      <td>27.15</td>\n",
+              "      <td>111.20</td>\n",
+              "      <td>930.9</td>\n",
+              "      <td>0.09898</td>\n",
+              "      <td>0.11100</td>\n",
+              "      <td>0.10070</td>\n",
+              "      <td>0.06431</td>\n",
+              "      <td>...</td>\n",
+              "      <td>34.49</td>\n",
+              "      <td>152.1</td>\n",
+              "      <td>1648.0</td>\n",
+              "      <td>0.1600</td>\n",
+              "      <td>0.24440</td>\n",
+              "      <td>0.26390</td>\n",
+              "      <td>0.15550</td>\n",
+              "      <td>0.3010</td>\n",
+              "      <td>0.09060</td>\n",
+              "      <td>NaN</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>9113156</td>\n",
+              "      <td>B</td>\n",
+              "      <td>14.40</td>\n",
+              "      <td>26.99</td>\n",
+              "      <td>92.25</td>\n",
+              "      <td>646.1</td>\n",
+              "      <td>0.06995</td>\n",
+              "      <td>0.05223</td>\n",
+              "      <td>0.03476</td>\n",
+              "      <td>0.01737</td>\n",
+              "      <td>...</td>\n",
+              "      <td>31.98</td>\n",
+              "      <td>100.4</td>\n",
+              "      <td>734.6</td>\n",
+              "      <td>0.1017</td>\n",
+              "      <td>0.14600</td>\n",
+              "      <td>0.14720</td>\n",
+              "      <td>0.05563</td>\n",
+              "      <td>0.2345</td>\n",
+              "      <td>0.06464</td>\n",
+              "      <td>NaN</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>911384</td>\n",
+              "      <td>B</td>\n",
+              "      <td>14.92</td>\n",
+              "      <td>14.93</td>\n",
+              "      <td>96.45</td>\n",
+              "      <td>686.9</td>\n",
+              "      <td>0.08098</td>\n",
+              "      <td>0.08549</td>\n",
+              "      <td>0.05539</td>\n",
+              "      <td>0.03221</td>\n",
+              "      <td>...</td>\n",
+              "      <td>18.22</td>\n",
+              "      <td>112.0</td>\n",
+              "      <td>906.6</td>\n",
+              "      <td>0.1065</td>\n",
+              "      <td>0.27910</td>\n",
+              "      <td>0.31510</td>\n",
+              "      <td>0.11470</td>\n",
+              "      <td>0.2688</td>\n",
+              "      <td>0.08273</td>\n",
+              "      <td>NaN</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>892399</td>\n",
+              "      <td>B</td>\n",
+              "      <td>10.51</td>\n",
+              "      <td>23.09</td>\n",
+              "      <td>66.85</td>\n",
+              "      <td>334.2</td>\n",
+              "      <td>0.10150</td>\n",
+              "      <td>0.06797</td>\n",
+              "      <td>0.02495</td>\n",
+              "      <td>0.01875</td>\n",
+              "      <td>...</td>\n",
+              "      <td>24.22</td>\n",
+              "      <td>70.1</td>\n",
+              "      <td>362.7</td>\n",
+              "      <td>0.1143</td>\n",
+              "      <td>0.08614</td>\n",
+              "      <td>0.04158</td>\n",
+              "      <td>0.03125</td>\n",
+              "      <td>0.2227</td>\n",
+              "      <td>0.06777</td>\n",
+              "      <td>NaN</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>5 rows × 33 columns</p>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-89ab7a4d-5609-40b1-b2bf-da65d9a2bded')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-89ab7a4d-5609-40b1-b2bf-da65d9a2bded button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-89ab7a4d-5609-40b1-b2bf-da65d9a2bded');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ]
+          },
+          "metadata": {},
+          "execution_count": 7
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "part = np.random.rand(len(df)) < 0.9\n",
+        "df_train = df[part]\n",
+        "df_test = df[~part]\n",
+        "\n",
+        "print('test_set', len(df_test))\n",
+        "print('training_set', len(df_train))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "CtDv7OomMnlp",
+        "outputId": "27a82ab3-2cbd-4682-8fa4-de516bbc0032"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "test_set 64\n",
+            "training_set 505\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "splits = IndexSplitter(list(range(int(len(df_train)*.8),len(df_train))))(range_of(df_train))"
+      ],
+      "metadata": {
+        "id": "lpHRchpKNMb7"
+      },
+      "execution_count": 30,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "cls='diagnosis'\n",
+        "procs = [Categorify, FillMissing, Normalize]\n",
+        "to = TabularPandas(df_train, procs, [], list(df_train.columns)[2:-1], y_names=cls, splits=splits)\n",
+        "dls = to.dataloaders(bs=64)\n",
+        "dls.show_batch()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 400
+        },
+        "id": "-GHguAUeOOsB",
+        "outputId": "c7ec4243-9980-4247-8096-01269778e728"
+      },
+      "execution_count": 34,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>radius_mean</th>\n",
+              "      <th>texture_mean</th>\n",
+              "      <th>perimeter_mean</th>\n",
+              "      <th>area_mean</th>\n",
+              "      <th>smoothness_mean</th>\n",
+              "      <th>compactness_mean</th>\n",
+              "      <th>concavity_mean</th>\n",
+              "      <th>concave points_mean</th>\n",
+              "      <th>symmetry_mean</th>\n",
+              "      <th>fractal_dimension_mean</th>\n",
+              "      <th>radius_se</th>\n",
+              "      <th>texture_se</th>\n",
+              "      <th>perimeter_se</th>\n",
+              "      <th>area_se</th>\n",
+              "      <th>smoothness_se</th>\n",
+              "      <th>compactness_se</th>\n",
+              "      <th>concavity_se</th>\n",
+              "      <th>concave points_se</th>\n",
+              "      <th>symmetry_se</th>\n",
+              "      <th>fractal_dimension_se</th>\n",
+              "      <th>radius_worst</th>\n",
+              "      <th>texture_worst</th>\n",
+              "      <th>perimeter_worst</th>\n",
+              "      <th>area_worst</th>\n",
+              "      <th>smoothness_worst</th>\n",
+              "      <th>compactness_worst</th>\n",
+              "      <th>concavity_worst</th>\n",
+              "      <th>concave points_worst</th>\n",
+              "      <th>symmetry_worst</th>\n",
+              "      <th>fractal_dimension_worst</th>\n",
+              "      <th>diagnosis</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>10.880000</td>\n",
+              "      <td>15.620000</td>\n",
+              "      <td>70.410004</td>\n",
+              "      <td>358.899994</td>\n",
+              "      <td>0.10070</td>\n",
+              "      <td>0.10690</td>\n",
+              "      <td>0.05115</td>\n",
+              "      <td>0.01571</td>\n",
+              "      <td>0.1861</td>\n",
+              "      <td>0.06837</td>\n",
+              "      <td>0.1482</td>\n",
+              "      <td>0.5380</td>\n",
+              "      <td>1.3010</td>\n",
+              "      <td>9.597002</td>\n",
+              "      <td>0.004474</td>\n",
+              "      <td>0.030930</td>\n",
+              "      <td>2.757000e-02</td>\n",
+              "      <td>0.006691</td>\n",
+              "      <td>0.01212</td>\n",
+              "      <td>0.004672</td>\n",
+              "      <td>11.940</td>\n",
+              "      <td>19.350000</td>\n",
+              "      <td>80.779999</td>\n",
+              "      <td>433.100006</td>\n",
+              "      <td>0.13320</td>\n",
+              "      <td>0.38980</td>\n",
+              "      <td>0.33650</td>\n",
+              "      <td>0.07966</td>\n",
+              "      <td>0.2581</td>\n",
+              "      <td>0.10800</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>12.000000</td>\n",
+              "      <td>15.650000</td>\n",
+              "      <td>76.949997</td>\n",
+              "      <td>443.299988</td>\n",
+              "      <td>0.09723</td>\n",
+              "      <td>0.07165</td>\n",
+              "      <td>0.04151</td>\n",
+              "      <td>0.01863</td>\n",
+              "      <td>0.2079</td>\n",
+              "      <td>0.05968</td>\n",
+              "      <td>0.2271</td>\n",
+              "      <td>1.2550</td>\n",
+              "      <td>1.4410</td>\n",
+              "      <td>16.160000</td>\n",
+              "      <td>0.005969</td>\n",
+              "      <td>0.018120</td>\n",
+              "      <td>2.007000e-02</td>\n",
+              "      <td>0.007027</td>\n",
+              "      <td>0.01972</td>\n",
+              "      <td>0.002607</td>\n",
+              "      <td>13.670</td>\n",
+              "      <td>24.900000</td>\n",
+              "      <td>87.779999</td>\n",
+              "      <td>567.900024</td>\n",
+              "      <td>0.13770</td>\n",
+              "      <td>0.20030</td>\n",
+              "      <td>0.22670</td>\n",
+              "      <td>0.07632</td>\n",
+              "      <td>0.3379</td>\n",
+              "      <td>0.07924</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>13.080000</td>\n",
+              "      <td>15.710000</td>\n",
+              "      <td>85.629997</td>\n",
+              "      <td>520.000000</td>\n",
+              "      <td>0.10750</td>\n",
+              "      <td>0.12700</td>\n",
+              "      <td>0.04568</td>\n",
+              "      <td>0.03110</td>\n",
+              "      <td>0.1967</td>\n",
+              "      <td>0.06811</td>\n",
+              "      <td>0.1852</td>\n",
+              "      <td>0.7477</td>\n",
+              "      <td>1.3830</td>\n",
+              "      <td>14.670000</td>\n",
+              "      <td>0.004097</td>\n",
+              "      <td>0.018980</td>\n",
+              "      <td>1.698000e-02</td>\n",
+              "      <td>0.006490</td>\n",
+              "      <td>0.01678</td>\n",
+              "      <td>0.002425</td>\n",
+              "      <td>14.500</td>\n",
+              "      <td>20.490000</td>\n",
+              "      <td>96.089996</td>\n",
+              "      <td>630.500000</td>\n",
+              "      <td>0.13120</td>\n",
+              "      <td>0.27760</td>\n",
+              "      <td>0.18900</td>\n",
+              "      <td>0.07283</td>\n",
+              "      <td>0.3184</td>\n",
+              "      <td>0.08183</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>12.340000</td>\n",
+              "      <td>14.950000</td>\n",
+              "      <td>78.290001</td>\n",
+              "      <td>469.100006</td>\n",
+              "      <td>0.08682</td>\n",
+              "      <td>0.04571</td>\n",
+              "      <td>0.02109</td>\n",
+              "      <td>0.02054</td>\n",
+              "      <td>0.1571</td>\n",
+              "      <td>0.05708</td>\n",
+              "      <td>0.3833</td>\n",
+              "      <td>0.9078</td>\n",
+              "      <td>2.6020</td>\n",
+              "      <td>30.150000</td>\n",
+              "      <td>0.007702</td>\n",
+              "      <td>0.008491</td>\n",
+              "      <td>1.307000e-02</td>\n",
+              "      <td>0.010300</td>\n",
+              "      <td>0.02970</td>\n",
+              "      <td>0.001432</td>\n",
+              "      <td>13.180</td>\n",
+              "      <td>16.850000</td>\n",
+              "      <td>84.110001</td>\n",
+              "      <td>533.099976</td>\n",
+              "      <td>0.10480</td>\n",
+              "      <td>0.06744</td>\n",
+              "      <td>0.04921</td>\n",
+              "      <td>0.04793</td>\n",
+              "      <td>0.2298</td>\n",
+              "      <td>0.05974</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>7.760000</td>\n",
+              "      <td>24.540001</td>\n",
+              "      <td>47.919998</td>\n",
+              "      <td>181.000000</td>\n",
+              "      <td>0.05263</td>\n",
+              "      <td>0.04362</td>\n",
+              "      <td>0.00000</td>\n",
+              "      <td>0.00000</td>\n",
+              "      <td>0.1587</td>\n",
+              "      <td>0.05884</td>\n",
+              "      <td>0.3857</td>\n",
+              "      <td>1.4280</td>\n",
+              "      <td>2.5480</td>\n",
+              "      <td>19.150000</td>\n",
+              "      <td>0.007189</td>\n",
+              "      <td>0.004660</td>\n",
+              "      <td>1.862645e-09</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.02676</td>\n",
+              "      <td>0.002783</td>\n",
+              "      <td>9.456</td>\n",
+              "      <td>30.370001</td>\n",
+              "      <td>59.160000</td>\n",
+              "      <td>268.599976</td>\n",
+              "      <td>0.08996</td>\n",
+              "      <td>0.06444</td>\n",
+              "      <td>0.00000</td>\n",
+              "      <td>0.00000</td>\n",
+              "      <td>0.2871</td>\n",
+              "      <td>0.07039</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5</th>\n",
+              "      <td>13.710000</td>\n",
+              "      <td>18.680000</td>\n",
+              "      <td>88.730003</td>\n",
+              "      <td>571.000000</td>\n",
+              "      <td>0.09916</td>\n",
+              "      <td>0.10700</td>\n",
+              "      <td>0.05385</td>\n",
+              "      <td>0.03783</td>\n",
+              "      <td>0.1714</td>\n",
+              "      <td>0.06843</td>\n",
+              "      <td>0.3191</td>\n",
+              "      <td>1.2490</td>\n",
+              "      <td>2.2840</td>\n",
+              "      <td>26.450001</td>\n",
+              "      <td>0.006739</td>\n",
+              "      <td>0.022510</td>\n",
+              "      <td>2.086000e-02</td>\n",
+              "      <td>0.013520</td>\n",
+              "      <td>0.01870</td>\n",
+              "      <td>0.003747</td>\n",
+              "      <td>15.110</td>\n",
+              "      <td>25.629999</td>\n",
+              "      <td>99.430000</td>\n",
+              "      <td>701.900024</td>\n",
+              "      <td>0.14250</td>\n",
+              "      <td>0.25660</td>\n",
+              "      <td>0.19350</td>\n",
+              "      <td>0.12840</td>\n",
+              "      <td>0.2849</td>\n",
+              "      <td>0.09031</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>6</th>\n",
+              "      <td>11.950000</td>\n",
+              "      <td>14.960001</td>\n",
+              "      <td>77.230003</td>\n",
+              "      <td>426.700012</td>\n",
+              "      <td>0.11580</td>\n",
+              "      <td>0.12060</td>\n",
+              "      <td>0.01171</td>\n",
+              "      <td>0.01787</td>\n",
+              "      <td>0.2459</td>\n",
+              "      <td>0.06581</td>\n",
+              "      <td>0.3610</td>\n",
+              "      <td>1.0500</td>\n",
+              "      <td>2.4550</td>\n",
+              "      <td>26.650000</td>\n",
+              "      <td>0.005800</td>\n",
+              "      <td>0.024170</td>\n",
+              "      <td>7.816000e-03</td>\n",
+              "      <td>0.010520</td>\n",
+              "      <td>0.02734</td>\n",
+              "      <td>0.003114</td>\n",
+              "      <td>12.810</td>\n",
+              "      <td>17.719999</td>\n",
+              "      <td>83.089996</td>\n",
+              "      <td>496.200012</td>\n",
+              "      <td>0.12930</td>\n",
+              "      <td>0.18850</td>\n",
+              "      <td>0.03122</td>\n",
+              "      <td>0.04766</td>\n",
+              "      <td>0.3124</td>\n",
+              "      <td>0.07590</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>7</th>\n",
+              "      <td>12.870000</td>\n",
+              "      <td>19.540001</td>\n",
+              "      <td>82.669998</td>\n",
+              "      <td>509.200012</td>\n",
+              "      <td>0.09136</td>\n",
+              "      <td>0.07883</td>\n",
+              "      <td>0.01797</td>\n",
+              "      <td>0.02090</td>\n",
+              "      <td>0.1861</td>\n",
+              "      <td>0.06347</td>\n",
+              "      <td>0.3665</td>\n",
+              "      <td>0.7693</td>\n",
+              "      <td>2.5970</td>\n",
+              "      <td>26.500000</td>\n",
+              "      <td>0.005910</td>\n",
+              "      <td>0.013620</td>\n",
+              "      <td>7.066000e-03</td>\n",
+              "      <td>0.006502</td>\n",
+              "      <td>0.02223</td>\n",
+              "      <td>0.002378</td>\n",
+              "      <td>14.450</td>\n",
+              "      <td>24.379999</td>\n",
+              "      <td>95.139999</td>\n",
+              "      <td>626.900024</td>\n",
+              "      <td>0.12140</td>\n",
+              "      <td>0.16520</td>\n",
+              "      <td>0.07127</td>\n",
+              "      <td>0.06384</td>\n",
+              "      <td>0.3313</td>\n",
+              "      <td>0.07735</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>8</th>\n",
+              "      <td>20.940001</td>\n",
+              "      <td>23.559999</td>\n",
+              "      <td>138.899994</td>\n",
+              "      <td>1364.000000</td>\n",
+              "      <td>0.10070</td>\n",
+              "      <td>0.16060</td>\n",
+              "      <td>0.27120</td>\n",
+              "      <td>0.13100</td>\n",
+              "      <td>0.2205</td>\n",
+              "      <td>0.05898</td>\n",
+              "      <td>1.0040</td>\n",
+              "      <td>0.8208</td>\n",
+              "      <td>6.3720</td>\n",
+              "      <td>137.899994</td>\n",
+              "      <td>0.005283</td>\n",
+              "      <td>0.039080</td>\n",
+              "      <td>9.518000e-02</td>\n",
+              "      <td>0.018640</td>\n",
+              "      <td>0.02401</td>\n",
+              "      <td>0.005002</td>\n",
+              "      <td>25.580</td>\n",
+              "      <td>27.000000</td>\n",
+              "      <td>165.300003</td>\n",
+              "      <td>2010.000000</td>\n",
+              "      <td>0.12110</td>\n",
+              "      <td>0.31720</td>\n",
+              "      <td>0.69910</td>\n",
+              "      <td>0.21050</td>\n",
+              "      <td>0.3126</td>\n",
+              "      <td>0.07849</td>\n",
+              "      <td>M</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>9</th>\n",
+              "      <td>12.340000</td>\n",
+              "      <td>12.270000</td>\n",
+              "      <td>78.940002</td>\n",
+              "      <td>468.500000</td>\n",
+              "      <td>0.09003</td>\n",
+              "      <td>0.06307</td>\n",
+              "      <td>0.02958</td>\n",
+              "      <td>0.02647</td>\n",
+              "      <td>0.1689</td>\n",
+              "      <td>0.05808</td>\n",
+              "      <td>0.1166</td>\n",
+              "      <td>0.4957</td>\n",
+              "      <td>0.7714</td>\n",
+              "      <td>8.955000</td>\n",
+              "      <td>0.003681</td>\n",
+              "      <td>0.009169</td>\n",
+              "      <td>8.732000e-03</td>\n",
+              "      <td>0.005740</td>\n",
+              "      <td>0.01129</td>\n",
+              "      <td>0.001366</td>\n",
+              "      <td>13.610</td>\n",
+              "      <td>19.270000</td>\n",
+              "      <td>87.220001</td>\n",
+              "      <td>564.900024</td>\n",
+              "      <td>0.12920</td>\n",
+              "      <td>0.20740</td>\n",
+              "      <td>0.17910</td>\n",
+              "      <td>0.10700</td>\n",
+              "      <td>0.3110</td>\n",
+              "      <td>0.07592</td>\n",
+              "      <td>B</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "learn = tabular_learner(dls, layers=[200,100], metrics=accuracy)\n",
+        "learn.lr_find()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 300
+        },
+        "id": "E4Hx2t69THj1",
+        "outputId": "c5a337c2-9a96-493a-ea09-684df64d254a"
+      },
+      "execution_count": 36,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": []
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "SuggestedLRs(valley=0.002511886414140463)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 36
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ],
+            "image/png": "iVBORw0KGgoAAAANSUhEUgAAAYIAAAEKCAYAAAAfGVI8AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4yLjIsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+WH4yJAAAgAElEQVR4nO3dd3xV9f3H8dfnZpINJGEkgbD3NFKsVVGs4gKqFUFbpUWptdVWrau/atXS1g6tu3WCmyJaxa1YFRUHAWVPESRsAiRAgKzv749cbcBscnJyc9/PxyMPcs895953Ljf3nbO+x5xziIhI+Ar4HUBERPylIhARCXMqAhGRMKciEBEJcyoCEZEwpyIQEQlzkX4HqK/U1FSXnZ3tdwwRkZAyf/78Hc65tKruC7kiyM7OJjc31+8YIiIhxczWV3efNg2JiIQ5FYGISJhTEYiIhLmQ20cgIlKdkpIS8vLyOHDggN9RfBMbG0tmZiZRUVF1XkZFICItRl5eHomJiWRnZ2Nmfsdpcs458vPzycvLo0uXLnVeTpuGRKTFOHDgAG3btg3LEgAwM9q2bVvvNSIVAVBUXMq8dTspKSv3O4qIHKFwLYGvNeTnD/tNQ8Wl5UyalstHa/NpEx/Naf3bc9agjgzLbkMgEN5vKBHxVkJCAnv37mXdunWceeaZLFmyxJccYV0Ezjmuf34RH63N5/KTurM+v4jnF2zkqU++YnBWCn/94UB6tkv0O6aIeGXRDHj7VijIg+RMGHkTDBznd6omF9abhu6cvZrnF2zkypN7cvUpvbh7whDm33gyfz1nIF/tLOKMu9/nH2+t4mBpmd9RRaSxLZoBL10BBRsAV/HvS1dUTG+g66+/nvvuu++b2zfffDNTpkxh5MiRDB06lAEDBvDiiy/W+BhlZWVcc801HH300QwcOJAHHngAgAsvvJAXXnjhm/kuuOCCWh+rrsK2CJ7N3cBdb6/mh0dlcsXI7t9Mj4uOZNzRWbx15fGcMaADd729mjPu/oC5a3Y02nNvLTzAgq92UVZe/WVCi0vLWbKxgJnz83h7+VY27d5PfS4ruj5/H/l7D9Z5/o2793PbaysY9sfZjHvgI15dvJlS7TORluztW6Fk/6HTSvZXTG+g8847jxkz/lckM2bM4KKLLuI///kPCxYs4J133uHqq6+u8Xf5kUceITk5mXnz5jFv3jweeughvvzySyZNmsS0adMAKCgoYO7cuZxxxhkNzlpZWG4aenXxZq5/fjHf657Kn88eUOXOlbYJMdw5fghjBmdw06wlnP/wJ5wxoAO/PaMPGSmtDpm3pKyc5+bn8dD7a9m5r5ioiABREQESYyPp2S6RPh2S6JGewIothby1bCsL8woAaJcUw9jBGYwZnEG5cyzeWMCivN0s3ljAyi17KCk79M2SEhfFgIxkTuqdzsl92pHVJu6Q+51zzP0in3+99wXvr64oru7pCQzr0oahnVqT1boVHVNa0T45lt1FJazdvpe1O/YxZ9V23li6BYATe6WzcuseLntqAR2SYzk3J4vhXdswKDOF+JiwfLtIS1WQV7/pdTBkyBC2bdvGpk2b2L59O61bt6Z9+/ZceeWVzJkzh0AgwMaNG9m6dSvt27ev8jHefPNNFi1axMyZMyviFBSwevVqTjnlFC677DK2b9/Oc889xznnnENkZOP8TlqoXbw+JyfHHcmgc68u3szlz3zGkKwUpv10GAl1+HA7UFLGg3PWct87azCDET3T6dkugR7tEik8UMI/3/2CvF37GZiZzOCsFErKyikpc+zaV8yKLXvYuPt/f3UMykrhlL7tyEhpxcuLNvHuyu2UVlozSG5V8WHfPyOZfh2T6NMhiYL9xSzbVMiyzXuYt24na7btBaBXu0Q6tY0jJjJAdGSANdv2siivgNSEGH5ybDZm8OmXO8ldt4u9B0ur/flS4qIYf3QnfjS8E5mt4ygrd/x3xTYem7uOD4JrQhEBo3f7RHq1T6RL23iyU+PJahNHm7hoUuKjSIyJpKi4jC2FB9hacIBAwLTDXZrc8uXL6dOnT91m/kf/4GahwyRnwZUN32l70003kZqaypYtW2jfvj1JSUm89tprPPnkk0RFRZGdnc27775LdnZ2lTuLzznnHCZPnsypp576rcf+y1/+QnR0NNOnT2fq1Kn07du3ygxVvQ5mNt85l1PV/GH1J15DSgAgNiqCK0b24AdDMrhz9moWfLWLN5dt4evP70GZyfxhTH9G9Eqrcu2ioKiE1dv2kNUmjnZJsd9MHzskg/y9B3lz2VbioiMYlJlC57ZxVT7GUZ3bfPP9uh37mL18K++u3M6GnUUUl5VzsKScpFZR/OkHAzh7aAaxUREAXDYCSsvKWb+ziE279we/DpASF0XXtAS6psaTkdLqkA/siIDx/b7t+H7fdhQUlbBgwy4WrN/Fgq92MXdNPs8v2PitfAGDw7d0dW4bx4+Hd+bcnCySW9X9LEeRJjHypop9ApU3D0W1qph+BM477zwuueQSduzYwXvvvceMGTNIT08nKiqKd955h/Xrqx0EFIBTTz2Vf/7zn5x00klERUWxatUqMjIyiI+PZ+LEiQwbNoz27dtXWwINETZF0NASqCyrTRy3jxsEVKwlfLF9LwdLyxmSlVLjsbvJcVHkZLep8r62CTFMGNapXjmyU+O5+LiuXHxc1zrNHxkRoFtaAt3SEur1PFCR/cRe6ZzYK/2baUXFpazPL2Ljrv3sKiqmYH8Ju4tKiI+JpH1yDO2SYtm+5yBPfLSeKa8s5/Y3V9E9PYGkVpEkxUaRmhBD/4wkBmSk0KNdAgEz8vcdZFvhQYrLyunVLlGbocR7Xx8d1MhHDfXr1489e/aQkZFBhw4duOCCCzjrrLMYMGAAOTk59O7du8blL774YtatW8fQoUNxzpGWlvbNTuJ27drRp08fxo4de0QZD+fppiEzGwXcBUQADzvnbjvs/k7AY0BKcJ7rnXOv1vSYDd009MHqHTww5wv++aOjGlQC0jBLNhbw73kb2Lh7P4X7Syg8UMLm3QfYE9xUFR0ZoKzcHbLj3Ay6psbTr2MyaYkxtIqKoFV0BJmtW3H6gA5ERYTtMQ5Si3ptGgpBRUVFDBgwgAULFpCcnFztfM1m05CZRQD3Ad8H8oB5ZjbLObes0my/A2Y45/5pZn2BV4FsL/J8r0cqx3YP31PP/dI/uL+jsvJyx/qdRSzK282yTYVERQRIT4ohPTGWgMGyzYUs2VjI/PW72F1UzP6Ssm82O901ezXXnNqLUf3b6/9Swsrs2bOZNGkSV155ZY0l0BBe/mk8DFjjnFsLYGbTgTFA5SJwQFLw+2Rgk4d59MHRTAQCRpfUeLqkxjNmcMa37j+l36FHUzjnKC4r5/1VO/jL6yv4+VMLGJSVwhUndWdEr3QitENawsDJJ59c6/6FhvKyCDKAyrvk84DvHDbPzcCbZnY5EA+cXNUDmdlkYDJAp071254uoc/MiImM4OS+7TixdzrPLcjjzrdWMemxXDJbt+JHwzszLieLNvHRfkcVCUl+b2ydAExzzmUCpwNPmNm3MjnnHnTO5TjnctLSqrz2soSJiIAxLieL9649kfvOH0pGSqtvToS76NFPmTFvA7v2FfsdU3wUaofEN7aG/PxerhFsBLIq3c4MTqtsEjAKwDn3kZnFAqnANg9zSQsQFRHgjIEdOGNgB1Zu2cPzC/J4ZfFmrn1uERH/qTiHYWSfihPvslPj/Y4rTSQ2Npb8/PywHYr66+sRxMbG1j5zJZ4dNWRmkcAqYCQVBTAPON85t7TSPK8B/3bOTTOzPsDbQIarIdSRnlAmLZdzjqWbCnl18WZmL9/Kqq0VJ951T09g7OCOjBmc8a2zsaVl0RXKqr9CWU1HDXl9+OjpwJ1UHBr6qHPuj2Z2K5DrnJsVPFLoISCBih3H1zrn3qzpMVUEUlcbdhbx9vKtvLp4C5+u2wnA0dmtuWJkD47roU2MEl58KwIvqAikIfJ2FfHi55v497wNfLWziB8P78wNp/cmLlrnlEh4qKkI/N5ZLNIkMlvH8YsTu/Pmlccz6XtdePKT9Zx+1/vMX7/T72givlMRSFiJjYrgxjP78swlwyktd4x74GOe/NibY7NFQoWKQMLS8K5tee1Xx3FCzzR+98ISbp61VNdfkLClIpCwlRgbxUMX5nDx97owbe46fvpYLoUHSvyOJdLkVAQS1iICxu/O7MttZw9g7podnP/Qx+zUCWkSZlQEIsD4YZ146KIcVm/dy/gHP2JbYfgehy7hR0UgEnRir3Sm/uRo8nbtZ9wDHx1yZTmRlkxFIFLJd7ul8sSk75C/r5hz/zmXNdv2+B1JxHMqApHDHNW5NdMnD6e4zPHDf32kcw2kxVMRiFShX8dknv/5d2kdF835D33CW8u2+h1JxDMqApFqdGobx8xLj6F3+0R+9kQuz83P8zuSiCdUBCI1aJsQwzOTh3NMt7ZcM3Mhry/Z7HckkUanIhCpRVx0JA9dmMPgrBQuf+Yz5qza7nckkUalIhCpg7joSKb+ZBjd0xOZ/EQu89ZpB7K0HCoCkTpKbhXFE5OG0TG5FT+dNo812/b6HUmkUagIROohNSGGxycNIzoiwMWPzWN3kYajkNCnIhCpp8zWcTzw46PYtPsAv3h6ASUatVRCnIpApAFystvwxx/058M1+Ux5eZnfcUSOiK7TJ9JA5+ZksXrbXh6cs5asNnFcfFxXvyOJNIiKQOQIXDeqN3m7ipjyynLKnWPy8d38jiRSbyoCkSMQETDuGj8Es8/506srKClz/OLE7n7HEqkXFYHIEYqKCHDXeYOJDBh/e2Ml5eWOy0f28DuWSJ2pCEQaQWREgDvGDSbCjNvfWkX/zGRO7JXudyyROtFRQyKNJCJg/OnsAfRsl8B1MxfpHAMJGSoCkUYUGxXBHeMGs3NfMTe+uNTvOCJ1oiIQaWT9M5L59ck9eGnhJmYt3OR3HJFaqQhEPHDpCd0Y0imFG19YwtbCA37HEamRikDEA1/vPC4uLeeXTy+guFTDUEjzpSIQ8UiX1Hj+8sOBzFu3iymvaBgKab50+KiIh0YP6siSjQU8OGct/TOSGZeT5XckkW/RGoGIx649tRfHdm/L715YwsINu/2OI/ItnhaBmY0ys5VmtsbMrq/i/n+Y2efBr1Vmpt8SaXEiIwLcO2Eo6Ykx/PzJ+ew5UOJ3JJFDeFYEZhYB3AecBvQFJphZ38rzOOeudM4Nds4NBu4Bnvcqj4ifWsdHc8+EIWwuPMDtb67yO47IIbxcIxgGrHHOrXXOFQPTgTE1zD8BeMbDPCK+GtKpNRcO78xjH63TJiJpVrwsggxgQ6XbecFp32JmnYEuwH89zCPiu6tP7UV6Ygw3PL+YUl3ZTJqJ5rKzeDww0zlXVtWdZjbZzHLNLHf79u1NHE2k8STFRnHzWf1YtrmQqR+u8zuOCOBtEWwEKh8rlxmcVpXx1LBZyDn3oHMuxzmXk5aW1ogRRZreqP7tOblPOne8tYq8XUV+xxHxtAjmAT3MrIuZRVPxYT/r8JnMrDfQGvjIwywizYaZccuY/pjB719cinPO70gS5jwrAudcKfBL4A1gOTDDObfUzG41s9GVZh0PTHf6bZAwkpHSiitP7snbK7bxxtKtfseRMGeh9vmbk5PjcnNz/Y4hcsRKy8o5694P2bWvmNlXn0BCjE70F++Y2XznXE5V9zWXncUiYScyIsAff9CfrXsO8I+3dG6B+EdFIOKjoZ1ac/6wTkz98EuWbCzwO46EKRWBiM+uPbU3beKj+b8XllBWHlqbaqVlUBGI+Cw5Loobz+zLwg27mTZ3nd9xJAypCESagdGDOjKydzp/f2MlX+Xr3AJpWioCkWbAzJjyg/5EBIwb/rNI5xZIk1IRiDQTHZJbccPpvflwTT4zcjfUvoBII1ERiDQjE47uxHe6tGHKK8t10XtpMioCkWYkEDBuO2cgxaXl/OnV5X7HkTChIhBpZrqkxjP5+K68+Pkm5q/f5XccCQMqApFm6NITupGeGMOtLy+jXOcWiMdUBCLNUHxMJNeN6s3CDbt5cWF1o7eLNA4VgUgz9YMhGQzKTOYvr62kqLjU7zjSgqkIRJqpQMC46ay+bCk8wL/eW+t3HGnBVAQizdhRndswelBHHnjvCzbs1BnH4g0VgUgz99vT+xAZMH4/S1czE2+oCESaufbJsVz5/Z78d8U23lymq5lJ41MRiISAid/Npnf7RG6ZtVQ7jqXRqQhEQkBkRIApY/uzqeAAd7292u840sKoCERCRE52G87LyeKR979kxZZCv+NIC6IiEAkh153Wm5S4KCZNy2VzwX6/40gLoSIQCSFt4qOZ9pNhFO4v4UcPf8LOfcV+R5IWQEUgEmL6ZyTz8EU55O3az8Spn7L3oHYey5FREYiEoO90bcv9Fwxl6aZCLn1ivgamkyOiIhAJUSP7tOPm0f34YM0OXl682e84EsJUBCIh7PxhnejdPpG/vr6Cg6VlfseREKUiEAlhEQHjt6f3IW/Xfp74aL3fcSREqQhEQtzxPdM4vmca9/x3DQVFJX7HkRCkIhBpAW44rTeFB0q49x2ddSz1pyIQaQH6dEjih0MzeWzueg1XLfWmIhBpIa4+pReBAPz1jZV+R5EQ42kRmNkoM1tpZmvM7Ppq5hlnZsvMbKmZPe1lHpGWrH1yLJcc15WXFm7is692+R1HQohnRWBmEcB9wGlAX2CCmfU9bJ4ewA3Asc65fsCvvcojEg5+dkI3UhNi+OMry3URG6kzL9cIhgFrnHNrnXPFwHRgzGHzXALc55zbBeCc2+ZhHpEWLyEmkqu+35Pc9bt4Y+kWv+NIiKhTEZhZvJkFgt/3NLPRZhZVy2IZwIZKt/OC0yrrCfQ0sw/N7GMzG1XX4CJStXE5mfRsl8Btr62guLTc7zgSAuq6RjAHiDWzDOBN4MfAtEZ4/kigBzACmAA8ZGYph89kZpPNLNfMcrdv394ITyvSckVGBLjh9D6syy/iyY91kpnUrq5FYM65IuBs4H7n3LlAv1qW2QhkVbqdGZxWWR4wyzlX4pz7ElhFRTEcwjn3oHMuxzmXk5aWVsfIIuFrRM80juuRyl1vr2Zb4QG/40gzV+ciMLNjgAuAV4LTImpZZh7Qw8y6mFk0MB6Yddg8L1CxNoCZpVKxqWhtHTOJSDXMjJtH9+NASRk3PL9YO46lRnUtgl9TcXTPf5xzS82sK/BOTQs450qBXwJvAMuBGcFlbzWz0cHZ3gDyzWxZ8PGucc7lN+QHEZFDdUtL4LpRvXl7xTaenZ/ndxxpxqy+fykEdxonOOd8uWhqTk6Oy83N9eOpRUJOebljwkMf03nTK/wp6T9E7tkIyZkw8iYYOM7veNKEzGy+cy6nqvvqetTQ02aWZGbxwBJgmZld05ghRaTxBQLG/QO/4BYeIHJPHuCgYAO8dAUsmuF3PGkm6rppqG9wDWAs8BrQhYojh0SkmWv78W20ssOubVyyH96+1Z9A0uzUtQiigucNjCV4lA+gvU8ioaCgmv0D1U2XsFPXIngAWAfEA3PMrDPgyz4CEamn5Mz6TZewU6cicM7d7ZzLcM6d7iqsB070OJuINIaRN0FUq0MmlQRiK6aLUPedxclmdsfXZ/ea2e1UrB2ISHM3cBycdTckZ+EwdkSkc33JxXzR4XS/k0kzUddNQ48Ce4Bxwa9CYKpXoUSkkQ0cB1cuwW7eTfmvFjM78gSumrFQYxEJUPci6Oac+31wJNG1zrlbgK5eBhMRb6QnxfLnswewcMNufj9ric46ljoXwX4z+97XN8zsWGC/N5FExGunD+jAZSO68cynG3jyk6/8jiM+i6zjfJcCj5tZcvD2LuAibyKJSFO4+pRerNiyh1tmLaVHegLDu7b1O5L4pK5HDS10zg0CBgIDnXNDgJM8TSYinooIGHeOH0yntnFc9tQC8nbpovfhql5XKHPOFVYaY+gqD/KISBNKio3i4QtzKCkt56p/L6SsXPsLwtGRXKrSGi2FiPima1oCN53Vl0/X7WTqh1/6HUd8cCRFoD8dRFqIHx6Vycl92vHXN1ayeusev+NIE6uxCMxsj5kVVvG1B+jYRBlFxGNmxp/PHkBCTCRXzVhISZnOLwgnNRaBcy7ROZdUxVeic66uRxyJSAhIS4zhj2P7s3hjAfe9s8bvONKEjmTTkIi0MKcN6MDYwR25979rWL5Z40qGCxWBiBzi92f1I7lVFNc/v1hHEYUJFYGIHKJ1fDQ3ndWXhRt28/hH6/yOI01ARSAi3zJ6UEdO6JnG395YycbdGk2mpVMRiMi3mBlTxvbHObjpBQ1M19KpCESkSllt4rj6lJ68vWIbLy3a7Hcc8ZCKQESq9ZNjuzA4K4UbX1jCloIDfscRj6gIRKRaEQHjH+cNpri0nN88u5ByHUXUIqkIRKRGXVLjufHMvnywZgfT5q7zO454QEUgIrWaMCyLkb3Tue31FazSWEQtjopARGplZtx2zkASYyL59fTPda3jFkZFICJ1kpYYw5/PHsCyzYX8890v/I4jjUhFICJ1dkq/9owe1JF7/rtaYxG1ICoCEamXm0f3IyUuimtmarjqlkJFICL10iY+mj+M6c+SjYU8OGet33GkEagIRKTeThvQgTMGdOCu2at1FFEL4GkRmNkoM1tpZmvM7Poq7p9oZtvN7PPg18Ve5hGRxnPLmH4kxkbyq+mfc7C0zO84cgQ8KwIziwDuA04D+gITzKxvFbP+2zk3OPj1sFd5RKRxpSbE8NcfDmT55kL+9vpKv+PIEfByjWAYsMY5t9Y5VwxMB8Z4+Hwi0sRG9mnHj4d35uEPvuT91dv9jiMN5GURZAAbKt3OC0473DlmtsjMZppZVlUPZGaTzSzXzHK3b9ebTaQ5+b8z+tA9PYGrZyxk575iv+NIA/i9s/glINs5NxB4C3isqpmccw8653KcczlpaWlNGlBEahYbFcHd44ewu6iEa2cu0rULQpCXRbARqPwXfmZw2jecc/nOuYPBmw8DR3mYR0Q80rdjEteO6sXs5Vt58pOv/I4j9eRlEcwDephZFzOLBsYDsyrPYGYdKt0cDSz3MI+IeOinx3bh+J5pTHl5GSu36JDSUOJZETjnSoFfAm9Q8QE/wzm31MxuNbPRwdmuMLOlZrYQuAKY6FUeEfFWIGDcfu4gEmMjueKZzzhQokNKQ4WF2va8nJwcl5ub63cMEanGuyu3MXHqPC48pjO3junvdxwJMrP5zrmcqu7ze2exiLQwI3qlM+l7XXj8o/W8sXSL33GkDlQEItLorh3ViwEZyfzm2YWs27HP7zhSCxWBiDS6mMgI7r9gKAEzfv7UAu0vaOZUBCLiiaw2cdw5fjArthTyuxeW6PyCZkxFICKeObFXOpef2J2Z8/P497wNtS8gvlARiIinfnVyT47rkcpNLy5l/vqdfseRKqgIRMRTEQHj7vFD6JgSy+TH55O3q8jvSHIYFYGIeK51fDQPX3Q0xWXlXPxYLnsPlvodSSpREYhIk+iensD9Fwxl9ba9/OqZzygr187j5kJFICJN5rgeadx8Vl/eXrGNu2av8juOBKkIRKRJ/fiYbM49KpN73lnD3C92+B1HUBGIiA9uGdOPLqnx/Hr65+TvPVj7AuIpFYGINLm46EjunTCU3ftLuPrZhZRrf4GvVAQi4ou+HZO48Yw+vLtyOw9/sNbvOGEt0u8AIhK+fjS8Mx+uyedPr66guLScX5zYHTPzO1bY0RqBiPjGzLhz/GB+MCSDv7+5il8+8xn7izVAXVPTGoGI+Co2KoI7xg2id/tEbnt9Bet27OPRiUfTLinW72hhQ2sEIuI7M+NnJ3Tj0YuOZt2OfUycOo99Ovu4yagIRKTZOLF3Ovf/6ChWbd3DFTr7uMmoCESkWTmhZxo3j+7H2yu2MeWVZX7HCQvaRyAizc6Ph3dm3Y59PPLBl3RJjefCY7L9jtSiqQhEpFn67el9WJ9fxO9nLSW5VRRjBmf4HanF0qYhEWmWIgLGPROG8J0ubbhqxkJeW7zZ70gtlopARJqtVtERPHLR0QzOSuHyZz5j9rKtfkdqkVQEItKsxcdEMvUnR9O3YxKXPbVAI5Z6QEUgIs1eUmwUj/90GJ3axvGLpxawYacud9mYVAQiEhJS4qJ56MIcSssdk5+Yr6EoGpGKQERCRpfUeO6eMIQVWwq59rlFOKcTzhqDikBEQsqJvdL5zSm9eGnhJv71noavbgw6j0BEQs5lI7qxbHMhf3l9BTv2HuSG03oTGaG/axtKRSAiIcfMuPO8waQlxPDIB1+ydFMB954/lNSEGL+jhSRPK9TMRpnZSjNbY2bX1zDfOWbmzCzHyzwi0nJERQS4eXQ/7hg3iM++2s3oez5g2aZCv2OFJM+KwMwigPuA04C+wAQz61vFfInAr4BPvMoiIi3X2UMzee7n38UB4x/8iAVf7fI7Usjxco1gGLDGObfWOVcMTAfGVDHfH4C/AAc8zCIiLVj/jGSevfQYWsdH8+OHP+GjL/L9jhRSvCyCDGBDpdt5wWnfMLOhQJZz7pWaHsjMJptZrpnlbt++vfGTikjIy2wdx7M/O4aOKa2YOPVT3lm5ze9IIcO33exmFgDuAK6ubV7n3IPOuRznXE5aWpr34UQkJKUnxTJ98nC6pycw+fFcXtVAdXXiZRFsBLIq3c4MTvtaItAfeNfM1gHDgVnaYSwiR6JtQgxPXzKcgZkp/PLpBTybu6H2hcKcl0UwD+hhZl3MLBoYD8z6+k7nXIFzLtU5l+2cywY+BkY753I9zCQiYSC5VRRPTBrGsd1TuWbmIqZ++KXfkZo1z4rAOVcK/BJ4A1gOzHDOLTWzW81stFfPKyICEBcdycMX5XBqv3bc8tIyrnjmM9bn7/M7VrNkoTZWR05OjsvN1UqDiNRNaVk5d85ezcMfrKW0zDF+WBZXnNSD9KRYv6M1KTOb75yrctO7zskWkRYtMiLAb07txZxrTmT8sCymf7qBk25/j+cX5GnQuiAVgYiEhfSkWKaMHcDsq06gb4ckrpqxkF8+8xm7i4r9juY7FYGIhJXs1HiemTyca0f14o0lWxh15/ssytvtdyKGIcAAAApQSURBVCxfqQhEJOxEBIzLRnTnP5cdS2SEceGjn7Jyyx6/Y/lGRSAiYWtAZjJPXzycmMgAP3rkk7A9qkhFICJhrVPbOJ6c9B1Ky8q54OFP2FIQfsOeqQhEJOz1aJfIYz8dxu6iEs59YC7vrQqvMc1UBCIiwMDMFB6fNIzIQICLHv2USx7PZcPOIr9jNQkVgYhI0NBOrXn918dx3ajefLhmByPveI+Z8/P8juU5FYGISCUxkRH8fEQ3/nv1CHI6t+Y3zy7kiY/X+x3LUyoCEZEqtE+O5dGJR3Nyn3RufGEJD7+/1u9InlERiIhUIzYqgvsvOIozBnRgyivLufvt1S1yWIpIvwOIiDRn0ZEB7ho/mJioAHe8tYp9xaVcP6o3ZuZ3tEajIhARqUVkRIC//3AQraIieOC9tRQdLOOW0f0IBI6sDD5Zm8/CvN1M/G4XoiP920CjIhARqYNAwJgytj8JMZE8MGct+4pL+es5A4mMaNgH+Edf5DNx6qccLC3nhc82cdf4wfRol9jIqetG+whEROrIzLj+tN5c/f2ePL9gI6Pv/ZB563bW+3EWfLWLSY/No1ObOG4/dxCbC/Zz5j0fMO3DL9m5r5jy8qbdD6EL04iINMBrizfzh5eXsangAGMHd+S603rTIblVrcst3VTAhAc/pnV8NDN+dgztkmLZVniAa2Yu+uaM5oBBSlw0Q7JSuH3cIFLioo84b00XplERiIg0UFFxKfe/8wUPzllLcVk5XVLjGZyVwsDMZFpFRVBcVk5xaTkF+0tYn1/EVzuLWLllD63jophx6TFkto775rGcc7yzchvr84vYta+Y7XsP8tz8jXRJjefxScNod4RXVFMRiIh46Kv8Il5evInPv9rN5xt2s23PwUPujwgYHVNi6dQmjs5t4/nZ8V3p3Da+1sedu2YHlzyeS+v4aJ6c9B2yU2tfpjoqAhGRJuKcY/veg5SVO6IjAkRFBoiLimjwTuVFebuZOHUeATMe++nR9OuY3KDH0TWLRUSaiJmRnhhLh+RWtE2IISk2qsElABWD4c342THERgVYn+/NIHg6fFREpJnrnp7A7KtOIDYqwpPH1xqBiEgI8KoEQEUgIhL2VAQiImFORSAiEuZUBCIiYU5FICIS5lQEIiJhTkUgIhLmQm6ICTPbDqwHkoGCSndVvv3194f/mwrsqOdTHv48db2/Lvlqy91UeWub1tzzNtV7oba8DXkvVJWxqml67zbee7eqaeHw3u3hnKt6fArnXEh+AQ9Wd/vr76v4N/dIn6eu99clXx1yN0ne2qY197xN9V6oLW9D3gtVZfPzta3r69lc8jbkvVvNtLB+74bypqGXarj9UjX/Nsbz1PX+uuSr7vumzlvbtOaet6neC7Ut35D3QuXbzeG1rWp6KL0XDp9WW0a/8zaL927IbRo6EmaW66oZfa85Ul7vhFJWUF6vhVJeL7KG8hpBQzzod4B6Ul7vhFJWUF6vhVLeRs8aVmsEIiLybeG2RiAiIodREYiIhDkVgYhImFMRBJnZcWb2LzN72Mzm+p2nNmYWMLM/mtk9ZnaR33lqY2YjzOz94Gs8wu88tTGzeDPLNbMz/c5SGzPrE3xdZ5rZz/3OUxszG2tmD5nZv83sFL/z1MTMuprZI2Y20+8s1Qm+Vx8LvqYXNOQxWkQRmNmjZrbNzJYcNn2Uma00szVmdn1Nj+Gce985dynwMvBYc88LjAEygRIgz6uswVyNkdcBe4FYPMzbSFkBrgNmeJPykFyN8d5dHnzvjgOODYG8LzjnLgEuBc5r5lnXOucmeZWxOvXMfjYwM/iajm7QEzbkDLXm9gUcDwwFllSaFgF8AXQFooGFQF9gABUf9pW/0istNwNIbO55geuBnwWXnRkCeQPB5doBTzXzrN8HxgMTgTOb+2sbXGY08BpwfijkDS53OzA0RLJ6+jt2hNlvAAYH53m6Ic/XIi5e75ybY2bZh00eBqxxzq0FMLPpwBjn3J+BKlf3zawTUOCc2+Nh3EbJa2Z5QHHwZpl3aRvv9Q3aBcR4kRMa7bUdAcRT8Uu238xedc6VN9e8wceZBcwys1eAp73I2lh5zcyA24DXnHMLmnNWv9QnOxVr2JnA5zRwK0+LKIJqZAAbKt3OA75TyzKTgKmeJapZffM+D9xjZscBc7wMVo165TWzs4FTgRTgXm+jfUu9sjrn/g/AzCYCO7wqgRrU97UdQcXmgRjgVU+TVa2+793LgZOBZDPr7pz7l5fhDlPf17Yt8EdgiJndECwMv1SX/W7gXjM7gwYOQ9GSi6DenHO/9ztDXTnniqgorpDgnHueivIKGc65aX5nqAvn3LvAuz7HqDPn3N1UfHg1e865fCr2ZTRbzrl9wE+O5DFaxM7iamwEsirdzgxOa66U1zuhlBWU10uhlPVwnmVvyUUwD+hhZl3MLJqKnX+zfM5UE+X1TihlBeX1UihlPZx32ZtyT7iHe9ifATbzv0MpJwWnnw6somJP+//5nVN5lVV5lbU5ZtegcyIiYa4lbxoSEZE6UBGIiIQ5FYGISJhTEYiIhDkVgYhImFMRiIiEORWBtAhmtreJn69RrllhFddpKDCzz81shZn9vQ7LjDWzvo3x/CKgIhCpkpnVOA6Xc+67jfh07zvnBgNDgDPNrLZrCoylYmRUkUahIpAWy8y6mdnrZjbfKq6O1js4/Swz+8TMPjOz2WbWLjj9ZjN7wsw+BJ4I3n7UzN41s7VmdkWlx94b/HdE8P6Zwb/onwoOs4yZnR6cNt/M7jazl2vK65zbT8VQwhnB5S8xs3lmttDMnjOzODP7LhXXHvhbcC2iW3U/p0hdqQikJXsQuNw5dxTwG+D+4PQPgOHOuSHAdODaSsv0BU52zk0I3u5NxfDZw4Dfm1lUFc8zBPh1cNmuwLFmFgs8AJwWfP602sKaWWugB/8bVvx559zRzrlBwHIqhhmYS8X4Mtc45wY7576o4ecUqRMNQy0tkpklAN8Fng3+gQ7/uyBOJvBvM+tAxZWevqy06KzgX+Zfe8U5dxA4aGbbqLjC2uGX2vzUOZcXfN7PgWwqLsu51jn39WM/A0yuJu5xZraQihK40zm3JTi9v5lNoeIaDgnAG/X8OUXqREUgLVUA2B3c9n64e4A7nHOzghd1ubnSffsOm/dgpe/LqPp3pi7z1OR959yZZtYF+NjMZjjnPgemAWOdcwuDF8kZUcWyNf2cInWiTUPSIjnnCoEvzexcqLg8opkNCt6dzP/Gcb/Iowgrga6VLjdY60Xag2sPtwHXBSclApuDm6MuqDTrnuB9tf2cInWiIpCWIs7M8ip9XUXFh+ek4GaXpVRc3xUq1gCeNbP5wA4vwgQ3L10GvB58nj1AQR0W/RdwfLBAbgQ+AT4EVlSaZzpwTXBndzeq/zlF6kTDUIt4xMwSnHN7g0cR3Qesds79w+9cIofTGoGIdy4J7jxeSsXmqAd8ziNSJa0RiIiEOa0RiIiEORWBiEiYUxGIiIQ5FYGISJhTEYiIhDkVgYhImPt/nhpUz0lwowYAAAAASUVORK5CYII=\n"
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "learn.fit(10,lr=10e-3)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 363
+        },
+        "id": "ufc20v7PTryG",
+        "outputId": "b096858a-f0e6-4cdd-a80d-745a698ab518"
+      },
+      "execution_count": 37,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.216377</td>\n",
+              "      <td>0.106181</td>\n",
+              "      <td>0.980198</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.217056</td>\n",
+              "      <td>0.050027</td>\n",
+              "      <td>0.990099</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.152939</td>\n",
+              "      <td>0.023288</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>3</td>\n",
+              "      <td>0.131706</td>\n",
+              "      <td>0.025833</td>\n",
+              "      <td>0.980198</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>4</td>\n",
+              "      <td>0.114391</td>\n",
+              "      <td>0.049435</td>\n",
+              "      <td>0.980198</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>5</td>\n",
+              "      <td>0.101248</td>\n",
+              "      <td>0.043451</td>\n",
+              "      <td>0.990099</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>6</td>\n",
+              "      <td>0.089460</td>\n",
+              "      <td>0.033685</td>\n",
+              "      <td>0.990099</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>7</td>\n",
+              "      <td>0.084512</td>\n",
+              "      <td>0.092898</td>\n",
+              "      <td>0.950495</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>8</td>\n",
+              "      <td>0.084504</td>\n",
+              "      <td>0.072087</td>\n",
+              "      <td>0.980198</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>9</td>\n",
+              "      <td>0.073757</td>\n",
+              "      <td>0.061605</td>\n",
+              "      <td>0.980198</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.model_selection import StratifiedKFold"
+      ],
+      "metadata": {
+        "id": "kHb1k88aOb7o"
+      },
+      "execution_count": 38,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=1)"
+      ],
+      "metadata": {
+        "id": "0OCaGIQTOgkC"
+      },
+      "execution_count": 39,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "test_dl = dls.test_dl(df_test, with_labels=True)\n",
+        "preds, target = learn.get_preds(dl=test_dl)\n",
+        "print(accuracy(preds,target).item()*100)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "id": "_FnmvmTMUe9j",
+        "outputId": "64adc6e4-02a3-4cfa-d4c6-a21d1c68cdfa"
+      },
+      "execution_count": 40,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": []
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "92.1875\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "interp=ClassificationInterpretation.from_learner(learn)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 17
+        },
+        "id": "woe1Erq9VMp3",
+        "outputId": "714e355a-2344-4a12-a760-65d0e09a8d51"
+      },
+      "execution_count": 51,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": []
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "interp.plot_confusion_matrix()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 311
+        },
+        "id": "kvThcGgx_cuF",
+        "outputId": "f6b05caf-dafd-455d-d2ac-394362f68e19"
+      },
+      "execution_count": 52,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": []
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ],
+            "image/png": "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\n"
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "interp.print_classification_report()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 173
+        },
+        "id": "0BTFEODb_2TJ",
+        "outputId": "58fca0cf-255b-407c-81b5-2445c86f31e7"
+      },
+      "execution_count": 16,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": []
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           B       0.97      1.00      0.98        63\n",
+            "           M       1.00      0.95      0.97        38\n",
+            "\n",
+            "    accuracy                           0.98       101\n",
+            "   macro avg       0.98      0.97      0.98       101\n",
+            "weighted avg       0.98      0.98      0.98       101\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "val_pct = []\n",
+        "test_pct = []\n",
+        "for train_index, val_index in skf.split(df_train.index, df_train[cls]):\n",
+        "  splits = (L(list(train_index)), L(list(val_index)))\n",
+        "  to = TabularPandas(df_train, procs, [], list(df_train.columns)[2:-1], y_names=cls, splits=splits)\n",
+        "  dls = to.dataloaders(bs=64)\n",
+        "  learn = tabular_learner(dls, layers=[200,100], metrics=accuracy)\n",
+        "  learn.fit(3, 1e-2)\n",
+        "  \n",
+        "  test_dl = dls.test_dl(df_test, with_labels=True)\n",
+        "  \n",
+        "  with learn.no_bar():\n",
+        "    val_pct.append(learn.validate()[-1])\n",
+        "    test_pct.append(learn.get_preds(dl=test_dl))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        },
+        "id": "8m_OLd37O7mU",
+        "outputId": "05e0cdee-75ff-4a51-99d3-35cda0f5a2cb"
+      },
+      "execution_count": 47,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.257072</td>\n",
+              "      <td>0.073275</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.181299</td>\n",
+              "      <td>0.050964</td>\n",
+              "      <td>0.980392</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.144530</td>\n",
+              "      <td>0.057643</td>\n",
+              "      <td>0.980392</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.248697</td>\n",
+              "      <td>0.082883</td>\n",
+              "      <td>0.980392</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.151426</td>\n",
+              "      <td>0.053884</td>\n",
+              "      <td>0.980392</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.122547</td>\n",
+              "      <td>0.021229</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.249370</td>\n",
+              "      <td>0.154228</td>\n",
+              "      <td>0.921569</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.142205</td>\n",
+              "      <td>0.124247</td>\n",
+              "      <td>0.980392</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.101176</td>\n",
+              "      <td>0.103686</td>\n",
+              "      <td>0.960784</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.198047</td>\n",
+              "      <td>0.123236</td>\n",
+              "      <td>0.941176</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.128132</td>\n",
+              "      <td>0.054593</td>\n",
+              "      <td>0.960784</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.098920</td>\n",
+              "      <td>0.049895</td>\n",
+              "      <td>0.941176</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.239931</td>\n",
+              "      <td>0.075507</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.164354</td>\n",
+              "      <td>0.033652</td>\n",
+              "      <td>0.980392</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.157778</td>\n",
+              "      <td>0.059016</td>\n",
+              "      <td>0.980392</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.202206</td>\n",
+              "      <td>0.106670</td>\n",
+              "      <td>0.960000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.133771</td>\n",
+              "      <td>0.095964</td>\n",
+              "      <td>0.940000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.112896</td>\n",
+              "      <td>0.044882</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.234844</td>\n",
+              "      <td>0.068619</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.135807</td>\n",
+              "      <td>0.012605</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.113491</td>\n",
+              "      <td>0.009060</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.286327</td>\n",
+              "      <td>0.131161</td>\n",
+              "      <td>0.960000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.170336</td>\n",
+              "      <td>0.051342</td>\n",
+              "      <td>0.960000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.137613</td>\n",
+              "      <td>0.048895</td>\n",
+              "      <td>0.980000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.201330</td>\n",
+              "      <td>0.109709</td>\n",
+              "      <td>0.960000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.144519</td>\n",
+              "      <td>0.102045</td>\n",
+              "      <td>0.980000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.104639</td>\n",
+              "      <td>0.133258</td>\n",
+              "      <td>0.980000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "<style>\n",
+              "    /* Turns off some styling */\n",
+              "    progress {\n",
+              "        /* gets rid of default border in Firefox and Opera. */\n",
+              "        border: none;\n",
+              "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+              "        background-size: auto;\n",
+              "    }\n",
+              "    progress:not([value]), progress:not([value])::-webkit-progress-bar {\n",
+              "        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);\n",
+              "    }\n",
+              "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+              "        background: #F44336;\n",
+              "    }\n",
+              "</style>\n"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: left;\">\n",
+              "      <th>epoch</th>\n",
+              "      <th>train_loss</th>\n",
+              "      <th>valid_loss</th>\n",
+              "      <th>accuracy</th>\n",
+              "      <th>time</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <td>0</td>\n",
+              "      <td>0.248730</td>\n",
+              "      <td>0.065491</td>\n",
+              "      <td>0.980000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>1</td>\n",
+              "      <td>0.164725</td>\n",
+              "      <td>0.025147</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <td>2</td>\n",
+              "      <td>0.125465</td>\n",
+              "      <td>0.040954</td>\n",
+              "      <td>0.980000</td>\n",
+              "      <td>00:00</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>"
+            ]
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for i, (pred, truth) in enumerate(test_pct):\n",
+        "    print(f'Fold {i+1}: {accuracy(pred, truth)}')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "HVafQ8_LWlKh",
+        "outputId": "14fd45f2-fe47-4b12-bacc-4c1b3a4f23de"
+      },
+      "execution_count": 49,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Fold 1: 0.921875\n",
+            "Fold 2: 0.9375\n",
+            "Fold 3: 0.9375\n",
+            "Fold 4: 0.953125\n",
+            "Fold 5: 0.9375\n",
+            "Fold 6: 0.953125\n",
+            "Fold 7: 0.953125\n",
+            "Fold 8: 0.9375\n",
+            "Fold 9: 0.921875\n",
+            "Fold 10: 0.96875\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "sum_preds = []\n",
+        "for i, (pred, truth) in enumerate(test_pct):\n",
+        "    sum_preds.append(pred.numpy())\n",
+        "avg_preds = np.sum(sum_preds, axis=0) / 5\n",
+        "print(f'Average Accuracy: {accuracy(tensor(avg_preds), test_pct[0][1])}')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "qpEkAuhKXO-T",
+        "outputId": "aaae9421-9775-454d-d2b7-d1e330672555"
+      },
+      "execution_count": 50,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Average Accuracy: 0.953125\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "TFqNzCISKbCl"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
